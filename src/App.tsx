@@ -13,6 +13,7 @@ import Checkout from './components/Checkout';
 import OrderTracking from './components/OrderTracking';
 import { Product, CartItem, Order, OrderStatus, CategoryType } from './types';
 import { motion, AnimatePresence } from 'motion/react';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
   // Navigation & Screen tab state
@@ -134,7 +135,7 @@ export default function App() {
   };
 
   // Handle final mock place order success
-  const handlePlaceOrder = (newOrder: Order) => {
+  const handlePlaceOrder = async (newOrder: Order) => {
     setActiveOrder(newOrder);
     setCartItems([]); // Flush Cart
     localStorage.removeItem('biteexpress_cart'); // Flush localstorage cart only, persist order
@@ -142,11 +143,36 @@ export default function App() {
     setPendingDiscount(0);
     setIsCheckoutActive(false);
     setCurrentTab('tracking'); // Switch immediately to status timeline tracking
-    showToast('🚀 Pedido enviado à cozinha com sucesso!');
+    showToast('🚀 Pedido enviado à cozinha!');
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('orders').insert([{
+          id: newOrder.id,
+          items: newOrder.items,
+          subtotal: newOrder.subtotal,
+          deliveryFee: newOrder.deliveryFee,
+          total: newOrder.total,
+          address: newOrder.address,
+          paymentMethod: newOrder.paymentMethod,
+          paymentDetails: newOrder.paymentDetails,
+          status: newOrder.status,
+          createdAt: newOrder.createdAt
+        }]);
+        if (error) {
+          console.error('Supabase save error:', error);
+          showToast('⚠️ Salvo apenas localmente (veja o console)');
+        } else {
+          showToast('💾 Sincronizado no Supabase com sucesso!');
+        }
+      } catch (err) {
+        console.error('Supabase dynamic exception:', err);
+      }
+    }
   };
 
   // Update chronological status in real-time tracking
-  const handleUpdateOrderStatus = (status: OrderStatus) => {
+  const handleUpdateOrderStatus = async (status: OrderStatus) => {
     if (!activeOrder) return;
     setActiveOrder((prev) => (prev ? { ...prev, status } : null));
 
@@ -157,6 +183,20 @@ export default function App() {
       showToast('🏍️ O entregador acabou de sair com seu pedido!');
     } else if (status === 'delivered') {
       showToast('🎉 Pedido entregue! Bom apetite!');
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ status })
+          .eq('id', activeOrder.id);
+        if (error) {
+          console.error('Supabase update status error:', error);
+        }
+      } catch (err) {
+        console.error('Error updating status in Supabase:', err);
+      }
     }
   };
 
