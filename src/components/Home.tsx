@@ -30,8 +30,8 @@ export default function Home({ onSelectProduct, onSelectCategory, onSearchFocus 
           <span className="text-neutral-400 text-xs">Seja bem-vindo(a) 👋</span>
           <span className="text-lg font-bold text-neutral-100">Pronto para o sabor de hoje?</span>
         </div>
-        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center font-bold text-white shadow-md text-sm border-2 border-neutral-900">
-          U
+        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center font-bold text-white shadow-md text-lg border-2 border-neutral-900">
+          🍔
         </div>
       </div>
 

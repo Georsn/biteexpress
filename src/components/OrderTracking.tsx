@@ -5,102 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
 function SupabaseIntegrationGuide() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [copiedSql, setCopiedSql] = useState(false);
-
-  const sqlCode = `-- 1. Criar a tabela de Pedidos (orders)
-create table public.orders (
-  id text not null primary key,
-  items jsonb not null,
-  subtotal numeric not null,
-  "deliveryFee" numeric not null,
-  total numeric not null,
-  address jsonb not null,
-  "paymentMethod" text not null,
-  "paymentDetails" jsonb,
-  status text not null,
-  "createdAt" timestamp with time zone not null default now()
-);
-
--- 2. Habilitar segurança Row Level Security (RLS)
-alter table public.orders enable row level security;
-
--- 3. Criar políticas para permitir acessos públicos rápidos
-create policy "Acesso livre insert" on public.orders for insert with check (true);
-create policy "Acesso livre select" on public.orders for select using (true);
-create policy "Acesso livre update" on public.orders for update using (true);`;
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(sqlCode);
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 2000);
-  };
-
   return (
-    <div id="supabase-integration-panel" className="p-4 rounded-3xl bg-neutral-900 border border-neutral-800 flex flex-col gap-3 text-left w-full">
-      <div className="flex items-center justify-between border-b border-neutral-850 pb-2">
-        <div className="flex items-center gap-1.5">
-          <Database size={15} className={isSupabaseConfigured ? "text-emerald-400" : "text-amber-500 animate-pulse"} />
-          <div className="flex flex-col">
-            <span className="text-[10px] text-white font-extrabold uppercase tracking-wide">Banco Supabase</span>
-            <span className="text-[9px] text-neutral-400">
-              {isSupabaseConfigured ? "🟢 Conectado ao Banco Real" : "🟡 Modo Simulação Local (Offline)"}
-            </span>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="text-[10px] font-bold text-orange-500 hover:text-orange-450 px-2 py-0.5 rounded-lg bg-neutral-950/70 cursor-pointer outline-none"
-        >
-          {isOpen ? "Ocultar Guia" : "Configurar Banco"}
-        </button>
-      </div>
-
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="text-xs text-neutral-300 flex flex-col gap-3 pt-1 select-text overflow-hidden"
-        >
-          <div className="flex flex-col gap-1.5">
-            <h4 className="text-[10px] font-black uppercase text-amber-500 tracking-wider">Passo 1: Criar Tabela no Supabase</h4>
-            <p className="text-[10px] text-neutral-400 leading-relaxed">
-              No seu painel do Supabase, vá em <strong>SQL Editor</strong> &gt; <strong>New Query</strong>, cole o código abaixo e clique em <strong>Run</strong>:
-            </p>
-            <div className="relative mt-1">
-              <pre className="p-2 bg-neutral-950 rounded-xl font-mono text-[9px] text-zinc-300 overflow-x-auto max-h-36 leading-normal border border-neutral-850">
-                {sqlCode}
-              </pre>
-              <button
-                type="button"
-                onClick={copyToClipboard}
-                className="absolute top-1.5 right-1.5 bg-neutral-900 text-neutral-400 hover:text-white px-2 py-1 rounded text-[8px] font-black transition-all cursor-pointer"
-              >
-                {copiedSql ? "Copiado!" : "Copiar SQL"}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 border-t border-neutral-850 pt-2.5">
-            <h4 className="text-[10px] font-black uppercase text-amber-500 tracking-wider">Passo 2: Configurar no Vercel</h4>
-            <p className="text-[10px] text-neutral-400 leading-relaxed">
-              Na página do seu projeto no <strong>Vercel &gt; Settings &gt; Environment Variables</strong>, adicione estas variáveis:
-            </p>
-            <div className="flex flex-col gap-1.5 font-mono text-[9px] bg-neutral-950 p-2 rounded-xl border border-neutral-850 leading-relaxed text-zinc-400">
-              <div>
-                <span className="text-orange-500 font-bold">VITE_SUPABASE_URL</span>: URL do Supabase Project (ex: https://xxx.supabase.co)
-              </div>
-              <div>
-                <span className="text-orange-500 font-bold">VITE_SUPABASE_ANON_KEY</span>: Chave anônima public/anon do projeto
-              </div>
-            </div>
-            <p className="text-[9px] text-zinc-500 leading-normal font-semibold">
-              💡 Importante: Após salvar as variáveis no Vercel, realize um novo deploy para carregar as chaves!
-            </p>
-          </div>
-        </motion.div>
-      )}
+    <div id="supabase-status-badge" className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-[10px] w-fit mx-auto">
+      <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured ? "bg-emerald-500" : "bg-red-500"}`} />
+      <span className="text-neutral-400 font-extrabold uppercase tracking-wider">
+        {isSupabaseConfigured ? "Conectado" : "Desconectado"}
+      </span>
     </div>
   );
 }
@@ -256,7 +166,7 @@ export default function OrderTracking({
         <div className="flex items-center justify-between bg-neutral-950/40 p-2.5 rounded-xl text-[10px] text-neutral-500 border border-neutral-850/50 mt-1.5">
           <span className="flex items-center gap-1">
             <Activity size={12} className="text-orange-500 shrink-0" />
-            Avanço automático (Demo: 15s)
+            Avanço automático
           </span>
           <input
             type="checkbox"

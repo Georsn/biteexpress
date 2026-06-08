@@ -161,13 +161,16 @@ export default function App() {
         }]);
         if (error) {
           console.error('Supabase save error:', error);
-          showToast('⚠️ Salvo apenas localmente (veja o console)');
+          showToast(`❌ Supabase: ${error.message} - ${error.details || ''}`);
         } else {
           showToast('💾 Sincronizado no Supabase com sucesso!');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Supabase dynamic exception:', err);
+        showToast(`❌ Erro de Conexão: ${err?.message || 'Falha no banco'}`);
       }
+    } else {
+      console.log('Supabase is not configured yet. Check environment variables.');
     }
   };
 
@@ -193,8 +196,9 @@ export default function App() {
           .eq('id', activeOrder.id);
         if (error) {
           console.error('Supabase update status error:', error);
+          showToast(`❌ Falha ao atualizar status no Supabase: ${error.message}`);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error updating status in Supabase:', err);
       }
     }
