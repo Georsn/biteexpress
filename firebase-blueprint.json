@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Represents a restaurant order placed by a customer",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the order"
+        },
+        "items": {
+          "type": "array",
+          "description": "List of cart items inside this order"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "The subtotal of the items in the order"
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "The delivery fee of the order"
+        },
+        "total": {
+          "type": "number",
+          "description": "The total amount of the order"
+        },
+        "address": {
+          "type": "object",
+          "description": "The delivery address details"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The payment method used"
+        },
+        "paymentDetails": {
+          "type": "object",
+          "description": "Optional details regarding cash payment/change"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current tracking status of the order"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The ISO timestamp when the order was created"
+        }
+      },
+      "required": ["id", "items", "subtotal", "deliveryFee", "total", "address", "paymentMethod", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "orders": {
+      "schema": "Order",
+      "description": "Collection of all restaurant orders"
+    }
+  }
+}

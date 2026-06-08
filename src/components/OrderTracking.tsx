@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Flame, Truck, CheckSquare, Clock, MapPin, CreditCard, ChevronRight, Activity, Database } from 'lucide-react';
 import { Order, OrderStatus } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isFirebaseConfigured } from '../lib/firebase';
 
-function SupabaseIntegrationGuide() {
+function FirebaseIntegrationBadge() {
   return (
-    <div id="supabase-status-badge" className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-[10px] w-fit mx-auto">
-      <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured ? "bg-emerald-500" : "bg-red-500"}`} />
+    <div id="firebase-status-badge" className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-[10px] w-fit mx-auto">
+      <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? "bg-emerald-500" : "bg-red-500"}`} />
       <span className="text-neutral-400 font-extrabold uppercase tracking-wider">
-        {isSupabaseConfigured ? "Conectado" : "Desconectado"}
+        {isFirebaseConfigured ? "Conectado" : "Desconectado"}
       </span>
     </div>
   );
@@ -94,7 +94,7 @@ export default function OrderTracking({
   if (!order) {
     return (
       <div id="no-order-active" className="p-4 text-white flex flex-col items-center justify-start text-center gap-5 py-6">
-        <SupabaseIntegrationGuide />
+        <FirebaseIntegrationBadge />
 
         <div className="flex flex-col items-center justify-center gap-4 py-12">
           <span className="text-5xl">🛵</span>
@@ -126,8 +126,8 @@ export default function OrderTracking({
         </div>
       </div>
 
-      {/* Supabase status display in active order page */}
-      <SupabaseIntegrationGuide />
+      {/* Firebase status display in active order page */}
+      <FirebaseIntegrationBadge />
 
       {/* ETA countdown box card */}
       <div id="eta-countdown-card" className="p-4 rounded-3xl bg-neutral-900 border border-neutral-800 flex flex-col gap-3 relative overflow-hidden">

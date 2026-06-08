@@ -13,7 +13,8 @@ import Checkout from './components/Checkout';
 import OrderTracking from './components/OrderTracking';
 import { Product, CartItem, Order, OrderStatus, CategoryType } from './types';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { db, isFirebaseConfigured, handleFirestoreError, OperationType } from './lib/firebase';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
 export default function App() {
   // Navigation & Screen tab state
@@ -145,9 +146,10 @@ export default function App() {
     setCurrentTab('tracking'); // Switch immediately to status timeline tracking
     showToast('🚀 Pedido enviado à cozinha!');
 
-    if (isSupabaseConfigured && supabase) {
+    if (isFirebaseConfigured) {
+      const orderPath = `orders/${newOrder.id}`;
       try {
-        const { error } = await supabase.from('orders').insert([{
+        await setDoc(doc(db, 'orders', newOrder.id), {
           id: newOrder.id,
           items: newOrder.items,
           subtotal: newOrder.subtotal,
@@ -155,22 +157,21 @@ export default function App() {
           total: newOrder.total,
           address: newOrder.address,
           paymentMethod: newOrder.paymentMethod,
-          paymentDetails: newOrder.paymentDetails,
+          paymentDetails: newOrder.paymentDetails || null,
           status: newOrder.status,
           createdAt: newOrder.createdAt
-        }]);
-        if (error) {
-          console.error('Supabase save error:', error);
-          showToast(`❌ Supabase: ${error.message} - ${error.details || ''}`);
-        } else {
-          showToast('💾 Sincronizado no Supabase com sucesso!');
-        }
+        });
+        showToast('💾 Sincronizado no Firebase com sucesso!');
       } catch (err: any) {
-        console.error('Supabase dynamic exception:', err);
-        showToast(`❌ Erro de Conexão: ${err?.message || 'Falha no banco'}`);
+        console.error('Firebase save error:', err);
+        try {
+          handleFirestoreError(err, OperationType.WRITE, orderPath);
+        } catch (wrappedErr: any) {
+          showToast(`❌ Erro no Firebase: ${wrappedErr.message}`);
+        }
       }
     } else {
-      console.log('Supabase is not configured yet. Check environment variables.');
+      console.log('Firebase is not configured yet.');
     }
   };
 
@@ -188,18 +189,19 @@ export default function App() {
       showToast('🎉 Pedido entregue! Bom apetite!');
     }
 
-    if (isSupabaseConfigured && supabase) {
+    if (isFirebaseConfigured) {
+      const orderPath = `orders/${activeOrder.id}`;
       try {
-        const { error } = await supabase
-          .from('orders')
-          .update({ status })
-          .eq('id', activeOrder.id);
-        if (error) {
-          console.error('Supabase update status error:', error);
-          showToast(`❌ Falha ao atualizar status no Supabase: ${error.message}`);
-        }
+        await updateDoc(doc(db, 'orders', activeOrder.id), {
+          status: status
+        });
       } catch (err: any) {
-        console.error('Error updating status in Supabase:', err);
+        console.error('Error updating status in Firebase:', err);
+        try {
+          handleFirestoreError(err, OperationType.UPDATE, orderPath);
+        } catch (wrappedErr: any) {
+          showToast(`❌ Erro no Firebase: ${wrappedErr.message}`);
+        }
       }
     }
   };
